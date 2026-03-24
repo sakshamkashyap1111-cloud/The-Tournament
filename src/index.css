@@ -85,3 +85,57 @@
     border: 1px solid hsl(359 99% 21% / 0.6);
   }
 }
+
+/* FLOATING WHATSAPP BUTTON */
+
+#floating-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+#floating-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  background: rgba(226, 34, 39, 0.85);
+  backdrop-filter: blur(12px);
+  color: white;
+  box-shadow: 0 0 20px #E22227;
+  animation: glowPulse 1.5s infinite;
+  transition: all 0.3s ease;
+}
+
+#floating-btn:hover {
+  transform: scale(1.1);
+}
+
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 10px #E22227; }
+  50% { box-shadow: 0 0 30px #E22227; }
+  100% { box-shadow: 0 0 10px #E22227; }
+}
+
+#madeby-panel {
+  position: absolute;
+  right: 75px;
+  bottom: 15px;
+  padding: 10px 18px;
+  border-radius: 25px;
+  background: rgba(34, 43, 49, 0.95);
+  color: white;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(50px);
+  transition: all 0.4s ease;
+}
+
+#floating-container:hover #madeby-panel {
+  opacity: 1;
+  transform: translateX(0);
+}
