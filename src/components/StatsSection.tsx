@@ -2,9 +2,9 @@ import { motion } from "framer-motion";
 import { Users, Swords, Trophy } from "lucide-react";
 
 const stats = [
-  { icon: Users, label: "Total Players", value: "2,500+" },
-  { icon: Swords, label: "Active Matches", value: "12" },
-  { icon: Trophy, label: "Total Prize Pool", value: "₹50,000+" },
+  { icon: Users, label: "Total Players", value: "2,000+" },
+  { icon: Swords, label: "Active Matches", value: "4" },
+  { icon: Trophy, label: "Total Prize Pool", value: "₹20,000+" },
 ];
 
 const StatsSection = () => (
