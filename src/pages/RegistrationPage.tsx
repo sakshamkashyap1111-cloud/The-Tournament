@@ -8,9 +8,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { tournaments } from "@/data/tournaments";
 import { toast } from "sonner";
+import { processPayment } from "@/lib/razorpay";
 
 type MatchType = "solo" | "duo" | "squad";
-
 const playerCount: Record<MatchType, number> = { solo: 1, duo: 2, squad: 4 };
 
 const RegistrationPage = () => {
@@ -24,6 +24,13 @@ const RegistrationPage = () => {
   const [discount, setDiscount] = useState(0);
   const [couponError, setCouponError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Form state
+  const [fullName, setFullName] = useState("");
+  const [leaderName, setLeaderName] = useState("");
+  const [teamName, setTeamName] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [email, setEmail] = useState("");
 
   if (!tournament || tournament.comingSoon) {
     return (
@@ -42,11 +49,8 @@ const RegistrationPage = () => {
 
   const applyCoupon = () => {
     setCouponError("");
-    if (!coupon.trim()) {
-      setDiscount(0);
-      return;
-    }
-    // Demo coupon validation
+    if (!coupon.trim()) { setDiscount(0); return; }
+    // TODO: Replace with validateCoupon() from firestore.ts
     if (coupon.toUpperCase() === "ARENA50") {
       setDiscount(50);
       toast.success("Coupon applied! ₹50 off");
@@ -64,11 +68,28 @@ const RegistrationPage = () => {
     e.preventDefault();
     setSubmitting(true);
 
-    // Simulate payment flow
-    setTimeout(() => {
-      toast.success("Registration successful!");
+    try {
+      // Razorpay payment flow
+      const paymentResult = await processPayment(finalFee, tournament.id, {
+        name: fullName,
+        email,
+        phone: whatsapp,
+      });
+
+      // TODO: After payment verification on backend, save registration to Firestore
+      // await addRegistration({ tournamentId: tournament.id, teamName, leaderName, ... });
+
+      toast.success("Payment successful! Registration confirmed.");
       navigate(`/confirmation?game=${tournament.gameName}&type=${matchType}`);
-    }, 1500);
+    } catch (err: any) {
+      if (err?.message === "Payment cancelled by user") {
+        toast.error("Payment cancelled");
+      } else {
+        toast.error("Payment failed. Please try again.");
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -85,27 +106,26 @@ const RegistrationPage = () => {
             </p>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-              {/* Common Fields */}
               <div className="space-y-3">
                 <div>
                   <Label className="text-xs uppercase tracking-wider text-muted-foreground font-display">Full Name</Label>
-                  <Input required className="mt-1 bg-input border-border focus:border-primary focus:ring-primary" placeholder="Your full name" />
+                  <Input required value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-1 bg-input border-border focus:border-primary focus:ring-primary" placeholder="Your full name" />
                 </div>
                 <div>
                   <Label className="text-xs uppercase tracking-wider text-muted-foreground font-display">Leader Name</Label>
-                  <Input required className="mt-1 bg-input border-border focus:border-primary focus:ring-primary" placeholder="Team leader name" />
+                  <Input required value={leaderName} onChange={(e) => setLeaderName(e.target.value)} className="mt-1 bg-input border-border focus:border-primary focus:ring-primary" placeholder="Team leader name" />
                 </div>
                 <div>
                   <Label className="text-xs uppercase tracking-wider text-muted-foreground font-display">Team Name</Label>
-                  <Input required className="mt-1 bg-input border-border focus:border-primary focus:ring-primary" placeholder="Unique team name" />
+                  <Input required value={teamName} onChange={(e) => setTeamName(e.target.value)} className="mt-1 bg-input border-border focus:border-primary focus:ring-primary" placeholder="Unique team name" />
                 </div>
                 <div>
                   <Label className="text-xs uppercase tracking-wider text-muted-foreground font-display">WhatsApp Number</Label>
-                  <Input required type="tel" className="mt-1 bg-input border-border focus:border-primary focus:ring-primary" placeholder="+91 XXXXXXXXXX" />
+                  <Input required type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="mt-1 bg-input border-border focus:border-primary focus:ring-primary" placeholder="+91 XXXXXXXXXX" />
                 </div>
                 <div>
                   <Label className="text-xs uppercase tracking-wider text-muted-foreground font-display">Email</Label>
-                  <Input required type="email" className="mt-1 bg-input border-border focus:border-primary focus:ring-primary" placeholder="your@email.com" />
+                  <Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 bg-input border-border focus:border-primary focus:ring-primary" placeholder="your@email.com" />
                 </div>
               </div>
 
@@ -125,15 +145,8 @@ const RegistrationPage = () => {
               <div className="space-y-2">
                 <Label className="text-xs uppercase tracking-wider text-muted-foreground font-display">Coupon Code</Label>
                 <div className="flex gap-2">
-                  <Input
-                    value={coupon}
-                    onChange={(e) => setCoupon(e.target.value)}
-                    placeholder="Enter coupon"
-                    className="bg-input border-border focus:border-primary focus:ring-primary"
-                  />
-                  <Button type="button" variant="outline" onClick={applyCoupon} className="border-primary/50 text-primary hover:bg-primary/10 shrink-0">
-                    Apply
-                  </Button>
+                  <Input value={coupon} onChange={(e) => setCoupon(e.target.value)} placeholder="Enter coupon" className="bg-input border-border focus:border-primary focus:ring-primary" />
+                  <Button type="button" variant="outline" onClick={applyCoupon} className="border-primary/50 text-primary hover:bg-primary/10 shrink-0">Apply</Button>
                 </div>
                 {couponError && <p className="text-xs text-destructive">{couponError}</p>}
                 {discount > 0 && <p className="text-xs text-primary">Discount: ₹{discount} off</p>}
