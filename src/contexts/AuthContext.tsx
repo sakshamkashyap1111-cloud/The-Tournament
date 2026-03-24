@@ -23,11 +23,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
+    let unsub: (() => void) | undefined;
+    // Timeout fallback in case Firebase isn't configured
+    const timeout = setTimeout(() => setLoading(false), 3000);
+
+    try {
+      unsub = onAuthStateChanged(auth, (u) => {
+        setUser(u);
+        setLoading(false);
+        clearTimeout(timeout);
+      });
+    } catch {
       setLoading(false);
-    });
-    return unsub;
+      clearTimeout(timeout);
+    }
+
+    return () => {
+      unsub?.();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
