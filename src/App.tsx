@@ -26,15 +26,6 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const FloatingButton = () => {
-  const togglePanel = () => {
-    const container = document.getElementById("floating-container");
-    container.classList.toggle("active");
-
-    setTimeout(() => {
-      container.classList.remove("active");
-    }, 3000);
-  };
-
   useEffect(() => {
     const handleClick = (e) => {
       const container = document.getElementById("floating-container");
@@ -51,7 +42,10 @@ const FloatingButton = () => {
     <div id="floating-container">
       <div id="madeby-panel">Made by Saksham Kashyap</div>
 
-      <button id="floating-btn" onClick={togglePanel}>
+      <button
+        id="floating-btn"
+        onClick={() => window.open("https://wa.me/919279890625", "_blank")}
+      >
         💬
       </button>
     </div>
