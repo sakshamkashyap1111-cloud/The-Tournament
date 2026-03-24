@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { useEffect } from "react";
 import Index from "./pages/Index";
 import TournamentPage from "./pages/TournamentPage";
 import TournamentsListPage from "./pages/TournamentsListPage";
@@ -23,6 +24,39 @@ import AdminBlog from "./pages/admin/AdminBlog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+const FloatingButton = () => {
+  const togglePanel = () => {
+    const container = document.getElementById("floating-container");
+    container.classList.toggle("active");
+
+    setTimeout(() => {
+      container.classList.remove("active");
+    }, 3000);
+  };
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      const container = document.getElementById("floating-container");
+      if (!e.target.closest("#floating-container")) {
+        container.classList.remove("active");
+      }
+    };
+
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
+
+  return (
+    <div id="floating-container">
+      <div id="madeby-panel">Made by Saksham Kashyap</div>
+
+      <button id="floating-btn" onClick={togglePanel}>
+        💬
+      </button>
+    </div>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -54,6 +88,9 @@ const App = () => (
 
             <Route path="*" element={<NotFound />} />
           </Routes>
+
+          {/* Floating Button */}
+          <FloatingButton />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
