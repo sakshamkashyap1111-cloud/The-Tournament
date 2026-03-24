@@ -37,10 +37,9 @@ const AdminLayout = () => {
     );
   }
 
-  // TODO: Re-enable auth guard after testing
-  // if (!user) {
-  //   return <Navigate to="/admin/login" replace />;
-  // }
+  if (!user) {
+    return <Navigate to="/admin/login" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-background flex">
